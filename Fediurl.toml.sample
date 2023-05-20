@@ -1,0 +1,12 @@
+[default]
+secret_key = "" # Generate with openssl rand -base64 32
+hosts = [
+    "127.0.0.1:8000"
+]
+
+[default.limits]
+file = "10MiB"
+data-form = "12MiB"
+
+[global.databases]
+fediurl_db = { url = "development.db" }

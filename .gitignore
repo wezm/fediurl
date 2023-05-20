@@ -1,1 +1,7 @@
 /target
+.env
+/Fediurl.toml
+*.db
+*.db-wal
+*.bak
+*.db-shm

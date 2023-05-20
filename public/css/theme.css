@@ -1,0 +1,427 @@
+html, body {
+  box-sizing: border-box;
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  font-family: sans-serif;
+  color: #222;
+}
+
+body {
+    padding: 0.5em 1em;
+}
+
+.wrapper {
+    min-height: 100%;
+    max-width: 1070px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    margin: 0 auto;
+}
+
+main {
+    flex-grow: 1;
+}
+
+header, main, footer {
+    flex-shrink: 0;
+}
+
+footer {
+    margin: 2em 0 1em;
+    font-size: smaller;
+    clear: both;
+}
+
+h1 {
+  font-weight: 300;
+}
+h2 {
+  font-weight: 400;
+  border-bottom: 1px solid #ccc;
+}
+h3 {
+  font-weight: 500;
+}
+h1 a {
+    text-decoration: none;
+    color: black;
+}
+
+table {
+  max-width: 100%;
+}
+
+article {
+  margin-bottom: 1em;
+}
+
+time {
+  color: #335C7B;
+  font-size: smaller;
+}
+
+/* flash messages */
+.flash {
+    border: 1px solid #335C7B;
+    background-color: hsl(205.8, 34.6%, 80%);
+    margin: 1em 0;
+    padding: 0.5em;
+    border-radius: 5px;
+}
+.flash-success {
+    border-color: green;
+    background-color: hsl(120, 100%, 95%);
+}
+.flash-warning {
+    border-color: #FFCC00;
+    background-color: hsl(48, 100%, 85%);
+}
+.flash-error {
+    border-color: red;
+    background-color: hsl(0, 100%, 90%);
+}
+
+/* lists */
+.tree-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.tree-list .tree-list {
+  list-style: none;
+  margin: 0;
+  padding-left: 20px;
+}
+
+.list-inline {
+  margin: 0 1em;
+}
+.list-inline li {
+  display: inline;
+}
+
+/* utility classes */
+.text-center {
+  text-align: center;
+}
+.text-right {
+  text-align: right;
+}
+
+.pull-left {
+  float: left;
+}
+.pull-right {
+  float: right;
+}
+.clear {
+  clear: both;
+}
+.position-relative {
+  position: relative;
+}
+.position-absolute {
+  position: absolute;
+}
+.top-0 {
+  top: 0;
+}
+.right-0 {
+  right: 0;
+}
+.margin-r-1em {
+  margin-right: 1em;
+}
+.margin-b-1em {
+  margin-bottom: 1em;
+}
+
+.visually-hidden {
+  clip-path: inset(100%);
+  clip: rect(1px, 1px, 1px, 1px);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
+
+/* icons */
+.icon {
+  display: inline-block;
+  width: 16px;
+}
+.icon svg { /* TODO: do this better */
+  position: relative;
+  top: 3px;
+}
+
+/* content */
+.markdown {
+  clear: left;
+}
+.markdown h1 {
+  font-size: 1.5em;
+  font-weight: 600;
+}
+.markdown h2 {
+  font-size: 1.25em;
+  border: none;
+  font-weight: 600;
+}
+.markdown h3 {
+  font-size: 1em;
+  font-weight: 600;
+}
+.markdown blockquote {
+  border-left: 2px solid aliceblue;
+}
+
+/* threads */
+.article-thread {
+}
+
+/* comments */
+.comment-tree .comment-tree .comment-tree {
+  padding-left: 15px;
+}
+.comment-tree .comment-tree .comment {
+  border-left: 2px solid lightblue;
+  padding-left: 15px;
+}
+.comment-tree .comment-tree .comment-tree .comment {
+  border-color: yellowgreen;
+}
+.comment-tree .comment-tree .comment-tree .comment-tree .comment {
+  border-color: gold;
+}
+.comment-tree .comment-tree .comment-tree .comment-tree .comment-tree .comment {
+  border-color: pink;
+}
+.comment-tree .comment-tree .comment-tree .comment-tree .comment-tree .comment-tree .comment {
+  border-color: mediumpurple;
+}
+.comment-tree .comment-tree .comment-tree .comment-tree .comment-tree .comment-tree .comment-tree .comment {
+  border-color: mediumblue;
+}
+.comment {
+  margin-top: 1em;
+}
+.comment-bar {
+  font-size: smaller;
+  background-color: whitesmoke;
+  background: linear-gradient(180deg, rgb(255,255,255) 0%, rgb(245,245,245) 100%);
+  padding: 0.25em 0.5em;
+}
+
+/* forms */
+form {
+  max-width: 600px;
+}
+.form-narrow {
+  max-width: initial;
+}
+.form-narrow input,
+.form-narrow .position-relative {
+  max-width: 300px;
+}
+.form-logout {
+  display: inline-block;
+}
+
+label, legend {
+  display: block;
+  margin: 0.5em 0;
+}
+label[for],
+.label-inline,
+legend {
+  font-weight: 500;
+}
+.label-inline {
+  display: inline-block;
+}
+
+fieldset {
+  margin: 0 0 1em 0;
+  padding: 0;
+  border: none;
+}
+
+textarea {
+  display: block;
+}
+
+form .preview,
+textarea,
+input[type="text"],
+input[type="email"],
+input[type="number"],
+input[type="password"],
+input[type="url"] {
+  box-sizing: border-box;
+  margin-bottom: 1em;
+  width: 100%
+}
+input[type="file"] {
+  margin-bottom: 1em;
+}
+textarea {
+  resize: vertical;
+}
+.buttons {
+  margin: 1em 0;
+}
+.buttons > * {
+  margin-right: 0.5em
+}
+form .preview {
+  height: 300px;
+  border: 1px solid #999;
+  border-radius: 3px;
+}
+form .preview-reply {
+  height: 200px;
+}
+select {
+  margin-bottom: 1em;
+}
+
+.field-description {
+  font-style: italic;
+  margin-top: -0.5em;
+  font-size: smaller;
+}
+legend + .field-description {
+  margin-top: 0;
+}
+
+.validation-error,
+.validation-help {
+  margin-left: 0.5em;
+}
+.validation-error {
+  color: indianred;
+}
+
+.slug-field {
+  display: flex;
+}
+.slug-prefix {
+  margin-right: 0.25em;
+}
+
+/* buttons */
+.link-button {
+  box-sizing: border-box;
+  display: inline-block;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-size: 13px;
+  border-radius: 5px;
+  padding: 2px 1em 0; /* 2px to vertically align the text */
+  height: 32px;
+  line-height: 30px;
+  text-decoration: none;
+  font-weight: 550;
+  color: white;
+  background: cornflowerblue;
+}
+.link-button:hover {
+  background: hsl(218.5, 79.2%, 50%);
+}
+
+/* user profile */
+.user-pronouns {
+  color: #666;
+}
+
+/* pagination */
+.pagination {
+  margin: 1em 0;
+}
+.pagination a {
+  text-decoration: none;
+}
+.pagination-link {
+  border: 1px solid slategrey;
+  padding: 0.25em 0.3em;
+}
+.pagination-page {
+  margin-left: -1px;
+}
+.pagination .pagination-link:first-child {
+  margin-right: 5px;
+}
+.pagination .pagination-link:last-child {
+  margin-left: 4px;
+}
+.pagination-current-page {
+  border-color: #3498db;
+  color: #3498db;
+}
+.pagination-link-disabled {
+  color: #555;
+}
+.pagination-ellipsis {
+  margin-left: -1px;
+}
+
+/* perhaps these should be in a dedicated user.css */
+/* edit profile */
+.profile-link-field-url {
+  margin-top: -0.5em;
+  margin-bottom: 1em;
+}
+.edit-avatar {
+}
+
+/* progressive enhancement */
+.hidden {
+  display: none;
+}
+
+/* attachments on entries */
+.entry-attachment {
+  margin: 0.5em;
+}
+
+@media screen and (max-width: 600px) {
+  /* bigger text on smaller screens; stops zoom on forms on iOS */
+  html, body, input, select, button, textarea {
+    font-size: 18px;
+  }
+}
+@media screen and (min-width: 600px) {
+  .visually-hidden-desktop {
+    clip-path: inset(100%);
+    clip: rect(1px, 1px, 1px, 1px);
+    height: 1px;
+    overflow: hidden;
+    position: absolute;
+    white-space: nowrap;
+    width: 1px;
+  }
+
+  .profile-link-field {
+    display: flex
+  }
+
+  /* floats on these are a fallback for browsers that don't support flexbox (E.g. Netsurf) */
+  .profile-link-field-name {
+    float: left;
+    clear: left;
+    box-sizing: border-box;
+    padding-right: 1em;
+    width: 200px;
+    flex: 0 0 200px;
+  }
+  .profile-link-field-url {
+    width: 400px;
+    float: left;
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+}
