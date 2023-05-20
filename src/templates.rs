@@ -6,7 +6,7 @@ pub mod session;
 use rocket::request::FlashMessage;
 
 pub use home::Home;
-pub use layout::{Layout, Nil, NoLayout, Title};
+pub use layout::{Layout, Nil, Title};
 
 markup::define! {
     Flash<'a, 'f>(flash: Option<&'a FlashMessage<'f>>) {

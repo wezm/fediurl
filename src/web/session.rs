@@ -1,6 +1,6 @@
 //! User authentication/session management.
 
-use reqwest::{Client, Response, Url};
+use reqwest::Url;
 use std::ops::Deref;
 
 // TODO: Refresh session cookie on new requests
@@ -15,7 +15,6 @@ use rocket::response::{Flash, Redirect};
 use rocket::serde::Deserialize;
 use rocket::{Route, State};
 use rocket_db_pools::Connection;
-use serde::de::DeserializeOwned;
 use time::Duration; // for Cookie
 
 use crate::config::AppConfig;
@@ -25,7 +24,7 @@ use crate::models::instance::{Instance, NewInstance};
 use crate::models::user::{NewUser, User};
 use crate::templates::{self, Layout, Title};
 use crate::web::XForwardedProto;
-use crate::{html, web, FediurlError, RespondOrRedirect};
+use crate::{html, http_client, json_or_error, web, FediurlError, RespondOrRedirect};
 
 pub const FEDIURL_SESSION: &str = "FEDIURL_SESSION";
 const SCOPES: &str = "read:search";
@@ -40,6 +39,7 @@ struct LoginForm<'v> {
 }
 
 #[derive(Deserialize)]
+#[serde(crate = "rocket::serde")]
 struct Application {
     name: String,
     // website: Option<String>,
@@ -152,11 +152,7 @@ async fn create(
                 }
                 Ok(None) => {
                     // This is a newly encountered instance
-                    // TODO: Extract method for building a client
-                    let client = Client::builder()
-                        .user_agent(format!("Fediurl {}", env!("CARGO_PKG_VERSION"))) // TODO: Move Fediurl into a constant
-                        .build()?;
-
+                    let client = http_client()?;
                     let domain = &*submission.instance;
                     let instance_url = Url::parse(&format!("https://{}/", domain))?;
 
@@ -167,16 +163,14 @@ async fn create(
                     let resp = client
                         .post(url)
                         .form(&[
-                            ("client_name", "Fediurl"),       // TODO: Move Fediurl into a constant
-                            ("redirect_uris", &redirect_uri), // TODO: This needs to be space separated
+                            ("client_name", crate::NAME),
+                            ("redirect_uris", &redirect_uri),
                             ("scopes", SCOPES),
                             ("website", FEDIURL_WEBSITE),
                         ])
                         .send()
                         .await?; // TODO: Add context info to error
-                    let Ok(app) = json_or_error::<Application>(resp).await else {
-                         todo!("render the error if it's an ErrorResponse");
-                    };
+                    let app = json_or_error::<Application>(resp).await?;
 
                     let (Some(client_id), Some(client_secret)) = (app.client_id, app.client_secret) else {
                         todo!("Render form again with flash message")
@@ -256,6 +250,7 @@ fn delete(cookies: &CookieJar<'_>) -> Flash<Redirect> {
 }
 
 #[derive(Deserialize)]
+#[serde(crate = "rocket::serde")]
 struct TokenResponse {
     access_token: String,
 }
@@ -277,11 +272,7 @@ async fn auth(
         return Err(FediurlError::InvalidPath)
     };
     let instance = Instance::from_domain(&mut *db, domain).await?;
-
-    // TODO: Extract method for building a client
-    let client = Client::builder()
-        .user_agent(format!("Fediurl {}", env!("CARGO_PKG_VERSION"))) // TODO: Move Fediurl into a constant
-        .build()?;
+    let client = http_client()?;
 
     // Use client id, secret, and code to get a token
     let prefix = safe_host(host, &proto, &config);
@@ -300,9 +291,7 @@ async fn auth(
         ])
         .send()
         .await?; // TODO: Add context info to error
-    let Ok(token) = json_or_error::<TokenResponse>(resp).await else {
-        todo!("render error in flash message");
-    };
+    let token = json_or_error::<TokenResponse>(resp).await?;
 
     // Create the user record.
     let new_user = NewUser {
@@ -339,29 +328,5 @@ impl AuthenticatedUser {
 impl From<sqlx::Error> for AuthenticatedUserError {
     fn from(err: sqlx::Error) -> Self {
         AuthenticatedUserError::Database(err)
-    }
-}
-
-#[derive(Deserialize)]
-#[serde(crate = "rocket::serde")]
-struct ErrorResponse {
-    // error: String,
-    error_description: String,
-}
-
-enum ErrorOrResponse {
-    Error(reqwest::Error),
-    Response(ErrorResponse),
-}
-
-async fn json_or_error<T: DeserializeOwned>(response: Response) -> Result<T, ErrorOrResponse> {
-    if response.status().is_success() {
-        let app = response.json().await.map_err(ErrorOrResponse::Error)?;
-        Ok(app)
-    } else {
-        error!("Request was unsuccessful ({})", response.status().as_u16());
-        // TODO: Distinguish 4xx and 5xx responses
-        let err: ErrorResponse = response.json().await.map_err(ErrorOrResponse::Error)?;
-        Err(ErrorOrResponse::Response(err))
     }
 }

@@ -1,7 +1,7 @@
 use std::env;
 
 use rocket::http::uri::Host;
-use serde::{Deserialize, Serialize};
+use rocket::serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(crate = "rocket::serde")]

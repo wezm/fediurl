@@ -3,9 +3,11 @@ extern crate rocket;
 
 use std::{fmt, io};
 
+use reqwest::{Client, StatusCode};
 use rocket::http::Status as HttpStatus;
 use rocket::response::{content, Flash, Redirect, Responder};
-use rocket::{tokio, Request};
+use rocket::serde::{Deserialize, DeserializeOwned, Serialize};
+use rocket::Request;
 
 pub mod config;
 pub mod db;
@@ -16,17 +18,19 @@ pub mod string_ext;
 mod templates;
 pub mod web;
 
+pub const NAME: &str = "Fediurl";
+
 #[derive(Debug)]
 pub enum FediurlError {
     Database(sqlx::Error),
-    Task(tokio::task::JoinError),
     /// HTTP client error
     Http(reqwest::Error),
-    LimitReached,
     Io(io::Error),
     Url(url::ParseError),
     /// Path is invalid or not found
     InvalidPath,
+    /// An error response from a Mastodon instance
+    ErrorResponse(ErrorResponse),
 }
 
 #[derive(Responder)]
@@ -39,12 +43,6 @@ pub enum RespondOrRedirect {
 impl From<sqlx::Error> for FediurlError {
     fn from(err: sqlx::Error) -> Self {
         FediurlError::Database(err)
-    }
-}
-
-impl From<tokio::task::JoinError> for FediurlError {
-    fn from(err: tokio::task::JoinError) -> Self {
-        FediurlError::Task(err)
     }
 }
 
@@ -70,12 +68,11 @@ impl fmt::Display for FediurlError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             FediurlError::Database(err) => err.fmt(f),
-            FediurlError::Task(err) => err.fmt(f),
-            FediurlError::LimitReached => f.write_str("a resource limit was reached"),
             FediurlError::Io(err) => err.fmt(f),
             FediurlError::InvalidPath => f.write_str("invalid path"),
             FediurlError::Http(err) => err.fmt(f),
             FediurlError::Url(err) => err.fmt(f),
+            FediurlError::ErrorResponse(err) => f.write_str(&err.error_description),
         }
     }
 }
@@ -89,7 +86,6 @@ pub fn html<T: markup::Render + fmt::Display>(template: T) -> content::RawHtml<S
 
 impl<'r> Responder<'r, 'static> for FediurlError {
     fn respond_to(self, req: &'r Request<'_>) -> rocket::response::Result<'static> {
-        // TODO: Produce a better error than 500 for ImageError
         match self {
             FediurlError::Database(sqlx::Error::RowNotFound) | FediurlError::InvalidPath => {
                 Err(HttpStatus::NotFound)
@@ -103,72 +99,56 @@ impl<'r> Responder<'r, 'static> for FediurlError {
     }
 }
 
-use serde::{Deserialize, Serialize};
-
-#[derive(Deserialize, Serialize)]
-struct Search {
-    accounts: Vec<Account>,
-    statuses: Vec<Status>,
-    // hashtags is also present but we're not interested in that
+#[derive(Deserialize)]
+#[serde(crate = "rocket::serde")]
+pub struct MastodonErrorResponse {
+    pub error: String,
+    pub error_description: String,
 }
 
-#[derive(Deserialize, Serialize)]
-struct Account {
-    id: String,
-    username: String,
-    acct: String,
+#[derive(Deserialize, Serialize, Debug)]
+#[serde(crate = "rocket::serde")]
+pub struct ErrorResponse {
+    #[serde(skip_deserializing)]
+    pub status: u16,
+    pub error: String,
+    pub error_description: String,
 }
 
-#[derive(Deserialize, Serialize)]
-struct Status {
-    id: String,
-    account: Account,
+impl ErrorResponse {
+    fn new(status: StatusCode, err: MastodonErrorResponse) -> Self {
+        Self {
+            status: status.as_u16(),
+            error: err.error,
+            error_description: err.error_description,
+        }
+    }
 }
 
-// pub async fn rewrite_url(remote_url: &Url) -> eyre::Result<Option<Url>> {
-//     // Do a search for the url and pick one as the result
-//     let config = Config::read(None)?;
-//     let client = Client::builder()
-//         .user_agent(format!("Fediurl {}", env!("CARGO_PKG_VERSION")))
-//         .build()?;
-//
-//     let instance = config.instance_url()?;
-//     let mut url = instance.join("/api/v2/search")?;
-//     let bearer_token = format!("Bearer {}", config.access_token);
-//     url.query_pairs_mut()
-//         .append_pair("q", remote_url.as_str())
-//         .append_pair("resolve", "true");
-//
-//     // Fetch search results
-//     info!("Searching...");
-//     let resp = client
-//         .get(url.clone())
-//         .header(AUTHORIZATION, &bearer_token)
-//         .send()
-//         .await?;
-//     let results: Search = json_or_error(resp).await?;
-//
-//     // Pick a result, favouring statuses first
-//     // TODO: Perhaps there needs to be a hint as whether we're expecting an account or status
-//     results
-//         .statuses
-//         .first()
-//         .map(|status| {
-//             let acct = format!("@{}", status.account.acct);
-//             let mut url = instance.clone();
-//             // NOTE(unwrap): won't panic as instance URL is known to be valid as a base URL
-//             url.path_segments_mut()
-//                 .unwrap()
-//                 .extend(&[&acct, &status.id]);
-//             Ok(url)
-//         })
-//         .or_else(|| {
-//             // Try accounts
-//             results
-//                 .accounts
-//                 .first()
-//                 .map(|account| instance.join(&format!("@{}", account.acct)))
-//         })
-//         .transpose()
-//         .map_err(Report::from)
-// }
+pub(crate) async fn json_or_error<T: DeserializeOwned>(
+    response: reqwest::Response,
+) -> Result<T, FediurlError> {
+    if response.status().is_success() {
+        let app = response.json().await?;
+        Ok(app)
+    } else {
+        let status = response.status();
+        // TODO: Distinguish 4xx and 5xx responses
+        let err = response
+            .json::<MastodonErrorResponse>()
+            .await
+            .map(|err| ErrorResponse::new(status, err))
+            .unwrap_or_else(|_| ErrorResponse {
+                status: status.as_u16(),
+                error: "http_client".to_string(),
+                error_description: "Request to instance was unsuccessful.".to_string(),
+            });
+        Err(FediurlError::ErrorResponse(err))
+    }
+}
+
+pub(crate) fn http_client() -> reqwest::Result<Client> {
+    Client::builder()
+        .user_agent(format!("{} {}", NAME, env!("CARGO_PKG_VERSION")))
+        .build()
+}

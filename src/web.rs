@@ -1,3 +1,4 @@
+pub mod rewrite;
 pub mod session;
 
 use std::borrow::Cow;
@@ -38,6 +39,7 @@ pub fn rocket() -> Rocket<Build> {
         .attach(AdHoc::config::<AppConfig>())
         .mount("/", routes())
         .mount("/", session::routes())
+        .mount("/", rewrite::routes())
         .mount("/public", FileServer::from("public"))
         .register("/", catchers())
 }

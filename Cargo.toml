@@ -14,9 +14,7 @@ rust-argon2 = { version = "1.0.0", default-features = false }
 sentry = { version = "0.28.0", default-features = false, features = ["backtrace", "contexts", "panic", "reqwest", "rustls"] }
 sqlx = { version = "0.6.2", features = [ "runtime-tokio-rustls", "sqlite", "time" ] } # needs to match rocket_db_pools
 time = { version = "0.3.5", features = ["std", "formatting"] } # version should match rocket
-serde = { version = "1.0.152", features = ["derive"] }
 serde_json = "1.0.94"
-tokio = { version = "1.24.2", features = ["rt-multi-thread", "macros"] }
 url = "2.3.1"
 
 [dependencies.rocket_db_pools]

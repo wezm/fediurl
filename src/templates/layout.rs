@@ -52,17 +52,15 @@ markup::define! {
             head {
                 meta[charset="utf-8"];
                 meta[name="viewport", content="width=device-width, initial-scale=1"];
-                title { "Fediurl -" @title.title() }
+                title { @crate::NAME "- " @title.title() }
                 link[rel="stylesheet", href="/public/css/theme.css", type="text/css", charset="utf-8"];
-                link[rel="stylesheet", type="text/css", href="/public/css/markdown.css"];
                 link[rel="icon", href=r#"data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">💬</text></svg>"#];
                 @head
-                script[src="/public/js/time.js", type="text/javascript", defer=true] {}
             }
             body {
                 .wrapper {
                     header {
-                        h1."pull-left" { a[href = uri!(crate::web::home).to_string()] { "Fediurl" } }
+                        h1."pull-left" { a[href = uri!(crate::web::home).to_string()] { @crate::NAME } }
                         nav."text-right" {
                             ul."list-inline" {
                                 li {
@@ -111,29 +109,6 @@ markup::define! {
                         }
                     }
                 }
-
-                script[type="text/javascript"] {
-                  "document.addEventListener('DOMContentLoaded', function() { setTimeTitles(); });"
-                }
-            }
-        }
-    }
-
-    NoLayout<'a, Head: markup::Render, Body: markup::Render>(title: Title<'a>, head: Head, body: Body, config: &'a AppConfig) {
-        @markup::doctype()
-
-        html[lang="en"] {
-            head {
-                meta[charset="utf-8"];
-                meta[name="viewport", content="width=device-width, initial-scale=1"];
-                title { "Fediurl -" @title.title() }
-                link[rel="stylesheet", href="/public/css/theme.css", type="text/css", charset="utf-8"];
-                link[rel="icon", href=r#"data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">💬</text></svg>"#];
-                @head
-                script[src="/public/js/time.js", type="text/javascript", defer=true] {}
-            }
-            body {
-                @body
             }
         }
     }
