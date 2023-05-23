@@ -1,0 +1,69 @@
+env:
+  SQLX_VERSION: 0.6.3
+  RUST_VERSION: 1.68.2 # Minimum of FreeBSD or Alpine version
+  CARGO_REGISTRIES_CRATES_IO_PROTOCOL: sparse
+  PATH: "$HOME/.cargo/bin:$PATH"
+  DATABASE_URL: sqlite:test.db
+
+alpine_task:
+  name: Build (Alpine Linux)
+  container:
+    image: alpine:3.18
+    cpu: 8
+  cargo_cache:
+    folder: $HOME/.cargo/registry
+    fingerprint_script: cat Cargo.lock
+  install_script:
+    - apk --update add git gcc musl-dev cargo sqlite-dev
+    - cargo install sqlx-cli --no-default-features --features rustls,sqlite --version ${SQLX_VERSION}
+  test_script:
+    - sqlx database reset -y
+    - cargo test
+  before_cache_script: rm -rf $HOME/.cargo/registry/index
+
+freebsd_task:
+  name: Build (FreeBSD)
+  freebsd_instance:
+    image_family: freebsd-13-1
+    cpu: 8
+  cargo_cache:
+    folder: $HOME/.cargo/registry
+    fingerprint_script: cat Cargo.lock
+  install_script:
+    - pkg install -y git-lite rust sqlite3
+    - cargo install sqlx-cli --no-default-features --features rustls,sqlite --version ${SQLX_VERSION}
+  test_script:
+    - sqlx database reset -y
+    - cargo test
+  before_cache_script: rm -rf $HOME/.cargo/registry/index
+
+task:
+  name: Build (Debian Linux)
+  container:
+    image: debian:11-slim
+    cpu: 8
+  cargo_cache:
+    folder: $HOME/.cargo/registry
+    fingerprint_script: cat Cargo.lock
+  install_script:
+    - apt-get update && apt-get install -y --no-install-recommends git ca-certificates curl gcc libc6-dev musl-tools libsqlite3-dev
+    - curl https://sh.rustup.rs -sSf | sh -s -- -y --profile minimal --default-toolchain ${RUST_VERSION}
+    - rustup target add x86_64-unknown-linux-musl
+    - mkdir ~/bin
+    - curl -L https://releases.wezm.net/upload-to-s3/0.2.0/upload-to-s3-0.2.0-x86_64-unknown-linux-musl.tar.gz | tar xzf - -C ~/bin
+    - cargo install sqlx-cli --no-default-features --features rustls,sqlite --version ${SQLX_VERSION}
+  test_script:
+    - sqlx database reset -y
+    # Run tests
+    - cargo test
+    # Check that we can successfully cross-compile to musl to avoid any surprises in the publish script
+    - cargo build --locked --target x86_64-unknown-linux-musl
+  publish_script: |
+    tag=$(git describe --exact-match HEAD 2>/dev/null || true)
+    if [ -n "$tag" ]; then
+      cargo build --release --locked --target x86_64-unknown-linux-musl
+      tarball="fediurl-${tag}-x86_64-unknown-linux-musl.tar.gz"
+      strip target/x86_64-unknown-linux-musl/release/fediurl
+      tar zcf "$tarball" -C target/x86_64-unknown-linux-musl/release fediurl
+      ~/bin/upload-to-s3 -b releases.wezm.net "$tarball" "fediurl/$tag/$tarball"
+    fi
