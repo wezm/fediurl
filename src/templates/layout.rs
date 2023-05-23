@@ -67,9 +67,6 @@ markup::define! {
                                     @if let Some(_user) = current_user {
                                         @Logout {}
                                     }
-                                    else {
-                                        a[href=uri!(crate::web::session::new).to_string()] { "Log in" }
-                                    }
                                 }
                             }
                         }

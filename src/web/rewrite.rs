@@ -8,7 +8,6 @@ use rocket_db_pools::Connection;
 use url::Url;
 
 use crate::db::Db;
-use crate::models::instance::Instance;
 use crate::web::session::AuthenticatedUser;
 use crate::{http_client, web};
 use crate::{json_or_error, ErrorResponse, FediurlError, RespondOrRedirect};
@@ -129,7 +128,7 @@ async fn lookup(
     user: &AuthenticatedUser,
     origin: &Origin<'_>,
 ) -> Result<Option<Url>, FediurlError> {
-    let instance = Instance::from_id(&mut *db, user.instance_id).await?;
+    let instance = user.instance(&mut *db).await?; // Instance::from_id(&mut *db, user.instance_id).await?;
     let client = http_client()?;
 
     // Build the remote_url

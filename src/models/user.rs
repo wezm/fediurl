@@ -4,7 +4,7 @@ use std::str::FromStr;
 use sqlx::SqliteConnection;
 use time::OffsetDateTime;
 
-use crate::models::instance::InstanceId;
+use crate::models::instance::{Instance, InstanceId};
 
 #[derive(sqlx::Type, Copy, Clone, Debug, Eq, PartialEq, Hash)]
 #[sqlx(transparent)]
@@ -94,5 +94,9 @@ impl User {
 
     pub async fn from_id(db: &mut SqliteConnection, user_id: UserId) -> Result<User, sqlx::Error> {
         user_query!("id", user_id).fetch_one(db).await
+    }
+
+    pub async fn instance(&self, db: &mut SqliteConnection) -> Result<Instance, sqlx::Error> {
+        Instance::from_id(&mut *db, self.instance_id).await
     }
 }

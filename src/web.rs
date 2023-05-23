@@ -18,7 +18,7 @@ use rocket::response::content::RawHtml;
 use rocket::serde::json::serde_json::json;
 use rocket::{Build, Data, Request, Response, Rocket};
 use rocket::{Catcher, Route, State};
-use rocket_db_pools::{sqlx, Database};
+use rocket_db_pools::{sqlx, Database, Connection};
 
 use crate::config::AppConfig;
 use crate::db::Db;
@@ -54,17 +54,22 @@ pub fn catchers() -> Vec<Catcher> {
 
 #[get("/")]
 pub(crate) async fn home<'f>(
+    mut db: Connection<Db>,
     config: &State<AppConfig>,
     flash: Option<FlashMessage<'f>>,
     current_user: Option<AuthenticatedUser>,
 ) -> Result<RawHtml<String>, FediurlError> {
+    let instance = match current_user {
+        Some(ref user) => Some(user.instance(&mut *db).await?),
+        None => None
+    };
     let page = Layout {
         config: config,
         title: Title::head("Home"),
         flash: flash.as_ref(),
         current_user: current_user.as_ref(),
         head: Nil {},
-        body: Home {},
+        body: Home {instance},
     };
     Ok(html(page))
 }
