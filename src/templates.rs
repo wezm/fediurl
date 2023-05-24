@@ -5,7 +5,7 @@ pub mod session;
 
 use rocket::request::FlashMessage;
 
-pub use home::Home;
+pub use home::{Home, Privacy};
 pub use layout::{Layout, Nil, Title};
 
 markup::define! {

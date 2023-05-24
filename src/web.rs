@@ -22,7 +22,7 @@ use rocket_db_pools::{sqlx, Database, Connection};
 
 use crate::config::AppConfig;
 use crate::db::Db;
-use crate::templates::{Home, Layout, Nil, Title};
+use crate::templates::{Privacy, Home, Layout, Nil, Title};
 use crate::web::session::AuthenticatedUser;
 use crate::{html, FediurlError};
 
@@ -45,7 +45,7 @@ pub fn rocket() -> Rocket<Build> {
 }
 
 pub fn routes() -> Vec<Route> {
-    routes![home]
+    routes![home, privacy]
 }
 
 pub fn catchers() -> Vec<Catcher> {
@@ -70,6 +70,23 @@ pub(crate) async fn home<'f>(
         current_user: current_user.as_ref(),
         head: Nil {},
         body: Home {instance},
+    };
+    Ok(html(page))
+}
+
+#[get("/privacy")]
+pub(crate) async fn privacy<'f>(
+    config: &State<AppConfig>,
+    current_user: Option<AuthenticatedUser>,
+    flash: Option<FlashMessage<'f>>,
+) -> Result<RawHtml<String>, FediurlError> {
+    let page = Layout {
+        config: config,
+        title: Title::head("Privacy & Security"),
+        flash: flash.as_ref(),
+        current_user: current_user.as_ref(),
+        head: Nil {},
+        body: Privacy {},
     };
     Ok(html(page))
 }

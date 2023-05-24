@@ -59,21 +59,22 @@ markup::define! {
             }
         }
 
-        section.privacy {
-            h3 { "Privacy & Security" }
+    }
 
-            p {
-                "Privacy and security is any important part of the Fediurl implementation. "
-                "The following measures are taken:"
-            }
+    Privacy {
+        h2 { "Privacy & Security" }
 
-            ul {
-                li { "Fediurl requests the bare minimum read-only permissions to perform its function "
-                "it can't read or post to your timeline." }
-                li { "There is no tracking or analytics used on the site." }
-                li { "User tokens are stored encrypted in the database." }
-                li { "The code is open-source." }
-            }
+        p {
+            "Privacy and security is any important part of the Fediurl implementation. "
+            "The following measures are taken:"
+        }
+
+        ul {
+            li { "Fediurl requests the bare minimum read-only permissions to perform its function "
+            "it can't read or post to your timeline." }
+            li { "There is no tracking or analytics used on the site." }
+            li { "User tokens are stored encrypted in the database." }
+            li { "The code is open-source." }
         }
     }
 }

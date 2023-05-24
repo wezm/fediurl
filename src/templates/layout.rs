@@ -84,6 +84,7 @@ markup::define! {
                         .socials {
                             a[href = uri!(crate::web::home).to_string()] { "Home" } " "
                             a[href = uri!(crate::web::home).to_string()] { "About" } " "
+                            a[href = uri!(crate::web::privacy).to_string()] { "Privacy & Security" } " "
                             a[href = uri!(crate::web::home).to_string()] { "Acknowledgements" }
                             " • "
                             a[href="https://twitter.com/wezm"] { "Twitter" } " "
