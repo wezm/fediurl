@@ -5,6 +5,22 @@ markup::define! {
         section."text-center"[id="connect"] {
             h2 { "Redirect Mastodon links to your own instance" }
 
+            p.lede {
+                "Fediurl is still in development. Follow "
+                a[href="https://mastodon.decentralised.social/@wezm"] { "wezm on Mastodon" }
+                " for updates or check back later."
+            }
+
+            @if let Some(instance) = instance {
+                "You are connected to " @instance.domain
+            }
+        }
+    }
+
+    Home2(instance: Option<Instance>) {
+        section."text-center"[id="connect"] {
+            h2 { "Redirect Mastodon links to your own instance" }
+
             p.lede { "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat." }
 
             @match instance {

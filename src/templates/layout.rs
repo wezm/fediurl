@@ -52,9 +52,9 @@ markup::define! {
             head {
                 meta[charset="utf-8"];
                 meta[name="viewport", content="width=device-width, initial-scale=1"];
-                title { @crate::NAME "- " @title.title() }
+                title { @crate::NAME " - " @title.title() }
                 link[rel="stylesheet", href="/public/css/theme.css", type="text/css", charset="utf-8"];
-                link[rel="icon", href=r#"data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">💬</text></svg>"#];
+                link[rel="icon", href=r#"data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">↩️</text></svg>"#];
                 @head
             }
             body {
@@ -83,11 +83,9 @@ markup::define! {
                     footer."text-center" {
                         .socials {
                             a[href = uri!(crate::web::home).to_string()] { "Home" } " "
-                            a[href = uri!(crate::web::home).to_string()] { "About" } " "
                             a[href = uri!(crate::web::privacy).to_string()] { "Privacy & Security" } " "
-                            a[href = uri!(crate::web::home).to_string()] { "Acknowledgements" }
+                            // a[href = uri!(crate::web::home).to_string()] { "Acknowledgements" }
                             " • "
-                            a[href="https://twitter.com/wezm"] { "Twitter" } " "
                             a[href="https://decentralised.social/wezm"] { "Fediverse" } " "
                             a[href="https://github.com/wezm"] { "GitHub" } " "
                             a[href="https://github.com/sponsors/wezm"] { "Support My Work" }
@@ -101,8 +99,9 @@ markup::define! {
                           else {
                               @years.start() @markup::raw("&ndash;") @years.end()
                           }
-                          " Wesley Moore — "
-                          a[href="https://github.com/wezm/fediurl"] { "Report issues, view code on GitHub" }
+                          " " a[href="https://www.wezm.net/"] { "Wesley Moore" }
+                          " — " @crate::NAME " is "
+                          a[href="https://github.com/wezm/fediurl"] { "open-source" } "."
                           " (" { config::git_revision() } ")"
                         }
                     }
@@ -118,5 +117,5 @@ markup::define! {
 fn copyright_years() -> RangeInclusive<u16> {
     // TODO: Probably don't need to get the year on every render
     // perhaps it can be cached
-    2021..=OffsetDateTime::now_utc().year() as u16
+    2023..=OffsetDateTime::now_utc().year() as u16
 }
