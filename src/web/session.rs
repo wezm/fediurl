@@ -7,7 +7,7 @@ use std::ops::Deref;
 
 use rocket::form::{Context, Contextual, Form};
 use rocket::http::uri::{Absolute, Host};
-use rocket::http::{Cookie, CookieJar};
+use rocket::http::{Cookie, CookieJar, SameSite};
 use rocket::outcome::{try_outcome, IntoOutcome};
 use rocket::request::{FlashMessage, FromRequest, Outcome, Request};
 use rocket::response::content::RawHtml;
@@ -306,6 +306,7 @@ async fn auth(
         .secure(proto.map_or(false, |proto| &*proto == "https"))
         .http_only(true)
         .max_age(Duration::weeks(1)) // FIXME: Make this a lot longer
+        .same_site(SameSite::Lax)
         .finish();
     cookies.add_private(cookie);
 
