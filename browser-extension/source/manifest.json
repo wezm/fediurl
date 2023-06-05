@@ -1,0 +1,33 @@
+{
+  "description": "TODO",
+  "manifest_version": 2,
+  "name": "Fediurl",
+  "version": "1.0",
+  "icons": {
+    "48": "icon.svg",
+    "96": "icon.svg"
+  },
+
+  "permissions": [
+    "tabs"
+  ],
+  "browser_action": {
+    "default_icon": {
+      "48": "icon.svg",
+      "96": "icon.svg"
+    },
+    "default_title": "Fediurl"
+//    "default_popup": "popup/geo.html",
+  },
+  
+  "background": {
+    "scripts": ["background.js"],
+    "persistent": false
+  },
+
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "fediurl@wezm.net"
+    }
+  }
+}
