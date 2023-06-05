@@ -50,11 +50,11 @@ markup::define! {
 
             p {
                 "Once Fediurl is connected to your instance you can put "
-                a[href="#"] { code { "https://fediurl.com/" } }
+                a[href="#"] { code { "https://fediurl.7bit.org/" } }
                 "in front of any Mastodon URL and it will try to find that URL on your instance "
                 "and redirect you to it. For example, for the status at https://mastodon.decentralised.social/@wezm/110375901972328927 "
                 "the redirect would be "
-                code { "https://fediurl.com/https://mastodon.decentralised.social/@wezm/110375901972328927" } "."
+                code { "https://fediurl.7bit.org/https://mastodon.decentralised.social/@wezm/110375901972328927" } "."
                 "Use one of the " a[href="#integrations"] { "integrations" } " to automate this."
             }
         }
