@@ -130,7 +130,8 @@ fn internal_server_error() -> RawHtml<&'static str> {
 
 pub fn stage() -> AdHoc {
     // TODO: Set SQLite options:
-    // syncronous = NORMAL, should be enough when WAL is used
+    // synchronous = NORMAL, should be enough when WAL is used. Rocket/SQLx defaults to FULL
+    // https://api.rocket.rs/v0.5-rc/rocket_db_pools/index.html#driver-defaults
 
     AdHoc::on_ignite("SQLx Stage", |rocket| async {
         rocket
