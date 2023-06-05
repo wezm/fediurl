@@ -1,5 +1,6 @@
 pub mod rewrite;
 pub mod session;
+mod r#static;
 
 use std::borrow::Cow;
 use std::time::Instant;
@@ -9,7 +10,6 @@ use rocket::figment::{
     providers::{Env, Format, Serialized, Toml},
     Figment, Profile,
 };
-use rocket::fs::FileServer;
 use rocket::http::{ContentType, Status};
 use rocket::outcome::IntoOutcome;
 use rocket::request::FlashMessage;
@@ -18,11 +18,11 @@ use rocket::response::content::RawHtml;
 use rocket::serde::json::serde_json::json;
 use rocket::{Build, Data, Request, Response, Rocket};
 use rocket::{Catcher, Route, State};
-use rocket_db_pools::{sqlx, Database, Connection};
+use rocket_db_pools::{sqlx, Connection, Database};
 
 use crate::config::AppConfig;
 use crate::db::Db;
-use crate::templates::{Privacy, Home, Layout, Nil, Title};
+use crate::templates::{Home, Layout, Nil, Privacy, Title};
 use crate::web::session::AuthenticatedUser;
 use crate::{html, FediurlError};
 
@@ -40,7 +40,7 @@ pub fn rocket() -> Rocket<Build> {
         .mount("/", routes())
         .mount("/", session::routes())
         .mount("/", rewrite::routes())
-        .mount("/public", FileServer::from("public"))
+        .mount("/", r#static::routes())
         .register("/", catchers())
 }
 
@@ -61,7 +61,7 @@ pub(crate) async fn home<'f>(
 ) -> Result<RawHtml<String>, FediurlError> {
     let instance = match current_user {
         Some(ref user) => Some(user.instance(&mut *db).await?),
-        None => None
+        None => None,
     };
     let page = Layout {
         config: config,
@@ -69,7 +69,7 @@ pub(crate) async fn home<'f>(
         flash: flash.as_ref(),
         current_user: current_user.as_ref(),
         head: Nil {},
-        body: Home {instance},
+        body: Home { instance },
     };
     Ok(html(page))
 }
