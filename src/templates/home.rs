@@ -86,11 +86,15 @@ markup::define! {
         }
 
         ul {
-            li { "Fediurl requests the bare minimum read-only permissions to perform its function "
+            li { "Fediurl requests the bare minimum read-only permissions to perform its function. "
             "it can't read or post to your timeline." }
             li { "There is no tracking or analytics used on the site." }
-            li { "User tokens are stored encrypted in the database." }
-            li { "The code is open-source." }
+            li { "User tokens " del { "are" } " will be stored encrypted in the database (see "
+                a[href="https://github.com/wezm/fediurl/issues/11"] { "#11" } ")." }
+            li {
+                "The code is "
+                a[href="https://github.com/wezm/fediurl"] { "open-source" } "."
+            }
         }
     }
 }
