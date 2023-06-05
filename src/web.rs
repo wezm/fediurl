@@ -137,7 +137,7 @@ pub fn stage() -> AdHoc {
         rocket
             .attach(Db::init())
             .attach(AdHoc::try_on_ignite("SQLx Migrations", run_migrations))
-            .attach(AdHoc::try_on_ignite("Load config", load_config))
+            .attach(AdHoc::try_on_ignite("Load config", init_sentry))
     })
 }
 
@@ -154,7 +154,7 @@ async fn run_migrations(rocket: Rocket<Build>) -> fairing::Result {
     }
 }
 
-pub async fn load_config(mut rocket: Rocket<Build>) -> fairing::Result {
+pub async fn init_sentry(mut rocket: Rocket<Build>) -> fairing::Result {
     let config = rocket.state::<AppConfig>().unwrap();
 
     if let Some(dsn) = config.sentry_dsn.as_deref() {
@@ -168,6 +168,8 @@ pub async fn load_config(mut rocket: Rocket<Build>) -> fairing::Result {
         ));
         info!("Sentry initialised");
         rocket = rocket.manage(guard)
+    } else {
+        info!("No Sentry DSN")
     }
 
     Ok(rocket)
